@@ -40,7 +40,7 @@ public class MaxbotixUltrasonicSensor extends SubsystemBase {
   }
 
   public void requestDistanceValue() {
-    i2cController.write(Constants.I2CAddress, 81);
+    i2cController.write(0, 81);
   }
 
   public void readDistanceValue() {
