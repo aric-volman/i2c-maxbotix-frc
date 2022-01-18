@@ -16,43 +16,77 @@ public class MaxbotixUltrasonicSensor extends SubsystemBase {
   private final I2C.Port i2cPort;
   private I2C i2cController;
 
-  private byte inputArray[] = { 0x00, 0x00 };
-  private int distance;
+  private byte inputDataArray[] = new byte[2];
+
+  private int highByteTwosComplement;
+  private int lowByteTwosComplement;
+
+  private double reportedDistance;
+  private double distance;
+
+  private boolean isBusy = false;
 
   /** Creates a new MaxbotixUltrasonicSensor. */
   public MaxbotixUltrasonicSensor() {
     i2cPort = I2C.Port.kOnboard;
 
-    i2cController = new I2C(i2cPort, Constants.I2CAddress);
+    // The RoboRIO uses 7 bit addressing, so the address here is 112
+    i2cController = new I2C(i2cPort, Constants.I2CAddresses.MaxbotixUltrasonicSensorI2CAddress);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
 
-    requestDistanceValue();
-    // Mfr. recommends 80 to 100 ms delay between request and read
-    Timer.delay(0.1);
-    readDistanceValue();
+    // An example of it's intended usage
+    reportedDistance = getDistance();
 
-    SmartDashboard.putNumber("Range", distance);
+    if (reportedDistance != -1.0) {
+      SmartDashboard.putNumber("Range", reportedDistance);
+    }
 
   }
 
   public void requestDistanceValue() {
-    i2cController.write(Constants.I2CAddress, 81);
+    i2cController.write(224, 81);
   }
 
   public void readDistanceValue() {
-    i2cController.read(0, 2, inputArray);
+    // Read two bytes of data
+    i2cController.read(225, 2, inputDataArray);
+    highByteTwosComplement = inputDataArray[0];
+    lowByteTwosComplement = inputDataArray[1];
+
+    // Correct the two's complement for both unsigned bytes
+    if (highByteTwosComplement < 0) highByteTwosComplement += 256;
+    if (lowByteTwosComplement < 0) lowByteTwosComplement += 256;
     /*
     Concatenate the highbyte (index 0) and lowbyte (index 1) 
     Concatenated bytes are in units of centimeters,
-    multiplied by 10 to get meters
+    divided by 100 to get meters
 
     Roughly based off of the official Arduino library
     */
-    distance = (inputArray[1] + inputArray[0]*256)*10;
+    distance = (lowByteTwosComplement + highByteTwosComplement*256.0)/100.0;
+  }
+
+  public double getDistance() {
+    if (!isBusy) {
+      isBusy = true;
+
+      Timer.delay(0.1); // For safety, if it has multiple calls
+      requestDistanceValue();
+      // Mfr. recommends 80 to 100 ms delay between request and read
+      Timer.delay(0.1);
+      readDistanceValue();
+
+      isBusy = false;
+
+      return distance;
+    } else {
+      return -1.0;
+    }
+
   }
 
 }

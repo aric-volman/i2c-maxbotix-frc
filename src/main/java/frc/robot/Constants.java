@@ -13,5 +13,7 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static final int I2CAddress = 112; 
+    public static class I2CAddresses {
+        public static final int MaxbotixUltrasonicSensorI2CAddress = 112;
+    } 
 }
