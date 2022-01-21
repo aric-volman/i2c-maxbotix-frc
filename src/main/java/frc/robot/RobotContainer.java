@@ -12,13 +12,13 @@ import frc.robot.subsystems.MaxbotixUltrasonicSensor;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * "declarative" paradigm, very little robot logic should asctually be handled in the {@link Robot}
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  MaxbotixUltrasonicSensor ultrasonicSensor = new MaxbotixUltrasonicSensor();
+  MaxbotixUltrasonicSensor ultrasonicSensor = new MaxbotixUltrasonicSensor(Constants.I2CAddresses.MaxbotixUltrasonicSensor);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings

@@ -4,13 +4,11 @@
 
 package frc.robot.subsystems;
 
-import frc.robot.Constants;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.I2C;
-
+/** Class for reporting data from Maxbotix I2CXL MaxSonar sensors. */
 public class MaxbotixUltrasonicSensor extends SubsystemBase {
   
   private final I2C.Port i2cPort;
@@ -26,12 +24,16 @@ public class MaxbotixUltrasonicSensor extends SubsystemBase {
 
   private boolean isBusy = false;
 
-  /** Creates a new MaxbotixUltrasonicSensor. */
-  public MaxbotixUltrasonicSensor() {
+  /**
+   * Constructor.
+   *
+   * @param address The address of the sensor on the I2C bus.
+   */
+  public MaxbotixUltrasonicSensor(int address) {
     i2cPort = I2C.Port.kOnboard;
 
     // The RoboRIO uses 7 bit addressing, so the address here is 112
-    i2cController = new I2C(i2cPort, Constants.I2CAddresses.MaxbotixUltrasonicSensorI2CAddress);
+    i2cController = new I2C(i2cPort, address);
   }
 
   @Override
@@ -47,11 +49,11 @@ public class MaxbotixUltrasonicSensor extends SubsystemBase {
 
   }
 
-  public void requestDistanceValue() {
+  private void requestDistanceValue() {
     i2cController.write(224, 81);
   }
 
-  public void readDistanceValue() {
+  private void readDistanceValue() {
     // Read two bytes of data
     i2cController.read(225, 2, inputDataArray);
     highByteTwosComplement = inputDataArray[0];
@@ -69,7 +71,7 @@ public class MaxbotixUltrasonicSensor extends SubsystemBase {
     */
     distance = (lowByteTwosComplement + highByteTwosComplement*256.0)/100.0;
   }
-
+  /** Gets the distance in meters that the sensor reports. */
   public double getDistance() {
     if (!isBusy) {
       isBusy = true;

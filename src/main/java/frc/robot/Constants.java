@@ -14,6 +14,6 @@ package frc.robot;
  */
 public final class Constants {
     public static class I2CAddresses {
-        public static final int MaxbotixUltrasonicSensorI2CAddress = 112;
+        public static final int MaxbotixUltrasonicSensor = 112;
     } 
 }
